@@ -1,0 +1,9 @@
+.DS_Store
+Thumbs.db
+*.log
+.cursor/
+__pycache__/
+_screens/
+*.docx
+*.py
+!generate_site.py
