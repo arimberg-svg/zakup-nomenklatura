@@ -16,6 +16,7 @@ LOGO_SRC = Path(r"C:\Users\User\Desktop\КУРСОРИО\slovar-mihalych\assets\
 FAV_SRC = Path(r"C:\Users\User\Desktop\КУРСОРИО\slovar-mihalych\assets\favicon.svg")
 
 MODULE_URL = "https://disk.yandex.ru/d/ja5BBRSIcqRyJw"
+PREFIXES = ("naming", "single", "mass")
 
 NAMING_HINTS = {
     1: "Тип — что это за товар. Марка — как на упаковке. Модель — заводской индекс. Характеристики — только то, без чего позицию не отличить.",
@@ -45,37 +46,8 @@ MASS_HINTS = {
     14: "Кликните на любой новый товар и выделите все сочетанием Ctrl + A.",
     15: "Массово проставьте марку / бренд. Модуль сам бренд не ставит.",
 }
-QUAD_HINTS = {
-    1: "Подготовьте список позиций, которые должны появиться на сайте.",
-    2: "Откройте QuadCRM.",
-    3: "Раздел «Прайсы» — отсюда берём данные поставщика.",
-    4: "Сначала поиск в основном каталоге. Если товар уже есть — не заводите второй раз.",
-    5: "Сопоставьте позицию прайса с карточкой каталога.",
-    6: "Проверьте совпадение наименования, артикула, бренда.",
-    7: "Если сомневаетесь — лучше уточнить, чем склеить разные товары.",
-    8: "Товар из прайса добавляйте, только когда сопоставление не нашло карточку.",
-    9: "Новую карточку заполняйте теми же правилами наименования, что и в 1С.",
-    10: "Не оставляйте пустые обязательные поля.",
-    11: "После создания сразу откройте карточку на редактирование.",
-    12: "Обновите остатки, иначе на сайте будет «нет в наличии» или неверное количество.",
-    13: "Проверьте, что правите именно ту позицию, которую только что завели.",
-    14: "Описание — для сайта, понятным языком.",
-    15: "Отредактируйте текст, уберите дубли и мусор из прайса.",
-    16: "Габариты нужны для доставки.",
-    17: "Фото: рабочий ракурс, без водяных знаков чужого магазина.",
-    18: "Характеристики должны совпадать с упаковкой.",
-    19: "При необходимости выгрузите характеристики, чтобы править пакетом.",
-    20: "Комплектация — что входит в набор. Не путайте с сопутствующим товаром.",
-    21: "После правки характеристик сохраните карточку.",
-    22: "Большой объём удобнее грузить из таблицы.",
-    23: "Файл Excel должен совпадать с шаблоном QUAD.",
-    24: "Картинки выгружаются отдельно от текста карточки.",
-    25: "Выгрузка товара на сайт — финальный шаг по самой карточке.",
-    26: "Проверьте статус выгрузки на следующем экране.",
-    27: "Если позиций несколько — дождитесь окончания пакета.",
-    28: "Остатки выгрузите отдельно.",
-    29: "Габариты тоже выгружаются отдельной операцией.",
-}
+
+HINTS = {"naming": NAMING_HINTS, "single": SINGLE_HINTS, "mass": MASS_HINTS}
 
 TITLES = {
     "naming": {
@@ -106,37 +78,6 @@ TITLES = {
         14: "Выделить все товары: Ctrl + A",
         15: "Проставить марку / бренд",
     },
-    "quad": {
-        1: "Список товаров для заливки",
-        2: "Работа в QuadCRM",
-        3: "Раздел «Прайсы»",
-        4: "Проверка товара в основном каталоге",
-        5: "Сопоставление товара",
-        6: "Сопоставление товара, часть 2",
-        7: "Сопоставление товаров, часть 3",
-        8: "Добавление товара из прайс-листов",
-        9: "Добавление нового товара",
-        10: "Добавление нового товара, продолжение",
-        11: "Редактирование товаров",
-        12: "Обновление остатков",
-        13: "Редактирование после остатков",
-        14: "Описание товара",
-        15: "Редактирование описания",
-        16: "Габариты товаров",
-        17: "Добавление фотографий",
-        18: "Редактирование характеристик",
-        19: "Выгрузка характеристик",
-        20: "Комплектация",
-        21: "Ещё правка характеристик",
-        22: "Загрузка характеристик из таблицы",
-        23: "Загрузка характеристик из Excel",
-        24: "Выгрузка изображений на сайт",
-        25: "Выгрузка товара на сайт",
-        26: "Выгрузка товара, часть 2",
-        27: "Выгрузка товаров, часть 3",
-        28: "Выгрузка остатков",
-        29: "Выгрузка габаритов",
-    },
 }
 
 
@@ -146,7 +87,9 @@ def e(text: str) -> str:
 
 def compress() -> dict[str, list[str]]:
     OUT.mkdir(parents=True, exist_ok=True)
-    mapping: dict[str, list[str]] = {"naming": [], "single": [], "mass": [], "quad": []}
+    for old in OUT.glob("quad_*.jpg"):
+        old.unlink()
+    mapping: dict[str, list[str]] = {p: [] for p in PREFIXES}
     for png in sorted(SRC.glob("*.png")):
         prefix = png.name.split("_")[0]
         if prefix not in mapping:
@@ -158,12 +101,18 @@ def compress() -> dict[str, list[str]]:
         im.save(dest, "JPEG", quality=72, optimize=True)
         mapping[prefix].append(dest.name)
         print("jpg", dest.name, dest.stat().st_size)
+    # Если исходных PNG нет — оставить уже собранные jpg по префиксам
+    for prefix in PREFIXES:
+        if mapping[prefix]:
+            continue
+        mapping[prefix] = [p.name for p in sorted(OUT.glob(f"{prefix}_*.jpg"))]
     return mapping
 
 
-def steps_html(prefix: str, files: list[str], hints: dict[int, str], open_first: int = 0) -> str:
+def steps_html(prefix: str, files: list[str], open_first: int = 0) -> str:
     chunks = []
     titles = TITLES[prefix]
+    hints = HINTS[prefix]
     for i, name in enumerate(files, 1):
         opened = " open" if i <= open_first else ""
         title = titles.get(i, f"Шаг {i}")
@@ -181,17 +130,16 @@ def steps_html(prefix: str, files: list[str], hints: dict[int, str], open_first:
 
 
 def write_html(mapping: dict[str, list[str]]) -> None:
-    naming = steps_html("naming", mapping["naming"], NAMING_HINTS, 2)
-    single = steps_html("single", mapping["single"], SINGLE_HINTS, 1)
-    mass = steps_html("mass", mapping["mass"], MASS_HINTS, 0)
-    quad = steps_html("quad", mapping["quad"], QUAD_HINTS, 0)
+    naming = steps_html("naming", mapping["naming"], 2)
+    single = steps_html("single", mapping["single"], 1)
+    mass = steps_html("mass", mapping["mass"], 0)
     page = f'''<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Создание карточек номенклатуры — отдел закупа</title>
-  <meta name="description" content="Внутренний регламент отдела закупа: наименование, заливка в 1С поштучно и массово, карточка на сайт в QUAD." />
+  <meta name="description" content="Внутренний регламент отдела закупа: наименование, заливка в 1С поштучно и массово." />
   <meta name="robots" content="noindex,nofollow" />
   <meta name="theme-color" content="#4208A8" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -213,7 +161,7 @@ def write_html(mapping: dict[str, list[str]]) -> None:
     <section class="hero">
       <p class="kicker">Внутренние регламенты · отдел закупа</p>
       <h1>Создание карточек номенклатуры</h1>
-      <p class="lead">Выберите тему — раскроется обучение со скриншотами из 1С и QuadCRM. Сначала заводим товар в 1С, на сайт — отдельным контуром QUAD.</p>
+      <p class="lead">Выберите тему — раскроется обучение со скриншотами из 1С. Заводим товар в справочник номенклатуры: поштучно или массово.</p>
     </section>
 
     <nav class="toc" aria-label="Темы обучения">
@@ -221,25 +169,23 @@ def write_html(mapping: dict[str, list[str]]) -> None:
       <a href="#naming" data-open="naming"><b>02</b><span>Правильное наименование</span></a>
       <a href="#single" data-open="single"><b>03</b><span>Заливка поштучно в 1С</span></a>
       <a href="#mass" data-open="mass"><b>04</b><span>Массовое заведение в 1С</span></a>
-      <a href="#quad" data-open="quad"><b>05</b><span>Заливка в QUAD / сайт</span></a>
-      <a href="#check" data-open="check"><b>06</b><span>Чек-лист готовности</span></a>
+      <a href="#check" data-open="check"><b>05</b><span>Чек-лист готовности</span></a>
     </nav>
 
     <details class="topic" id="choose">
       <summary>
         <span class="num">01</span>
-        <span class="sum-text">Какой путь выбрать<small>Одна позиция, линейка или сайт</small></span>
+        <span class="sum-text">Какой путь выбрать<small>Одна позиция или линейка</small></span>
         <span class="chev">▾</span>
       </summary>
       <div class="topic-body">
-        <p>Номенклатура живёт в 1С. Карточка на сайте — это отдельный контур QUAD. Сначала заводим товар в 1С, потом (если он должен быть онлайн) заливаем в QuadCRM.</p>
+        <p>Номенклатура живёт в 1С. Сначала проверьте, нет ли товара в базе, затем заводите поштучно или массовым модулем.</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Ситуация</th><th>Что открыть</th></tr></thead>
             <tbody>
               <tr><td>Одна позиция или несколько штук</td><td><a href="#single" data-open="single">Тема 03 — поштучно в 1С</a></td></tr>
               <tr><td>Линейка, десятки позиций, есть Excel</td><td><a href="#mass" data-open="mass">Тема 04 — массовая заливка</a></td></tr>
-              <tr><td>Товар должен быть на сайте</td><td>Сначала 1С, затем <a href="#quad" data-open="quad">тема 05 — QUAD</a></td></tr>
             </tbody>
           </table>
         </div>
@@ -304,25 +250,9 @@ def write_html(mapping: dict[str, list[str]]) -> None:
       </div>
     </details>
 
-    <details class="topic" id="quad">
-      <summary>
-        <span class="num">05</span>
-        <span class="sum-text">Заливка в QUAD / сайт<small>SkillCup [1085]</small></span>
-        <span class="chev">▾</span>
-      </summary>
-      <div class="topic-body">
-        <p>QuadCRM — контур сайта. Сюда товар попадает, если позиция должна продаваться онлайн. 29 шагов: выберите нужный блок.</p>
-        <div class="note">
-          <b>Логика QUAD</b>
-          Ищем в каталоге и прайсе → не создаём дубль → описание, фото, габариты, характеристики → выгрузка на сайт (товар, картинки, остатки, габариты).
-        </div>
-        {quad}
-      </div>
-    </details>
-
     <details class="topic" id="check">
       <summary>
-        <span class="num">06</span>
+        <span class="num">05</span>
         <span class="sum-text">Чек-лист готовности<small>Карточку можно считать готовой, если всё закрыто</small></span>
         <span class="chev">▾</span>
       </summary>
@@ -335,11 +265,10 @@ def write_html(mapping: dict[str, list[str]]) -> None:
               <tr><td>1С, идентификация</td><td>Штрихкод и артикул внесены, единица хранения указана.</td></tr>
               <tr><td>1С, закупка</td><td>Вид номенклатуры = товар, бренд выбран, основной поставщик на вкладке min–max.</td></tr>
               <tr><td>1С, массовая заливка</td><td>Модуль без ошибок, группа верная, бренд проставлен всем через Ctrl+A.</td></tr>
-              <tr><td>QUAD / сайт</td><td>Нет дубля, есть описание, фото, габариты, характеристики, выгружены остатки.</td></tr>
             </tbody>
           </table>
         </div>
-        <p>Источники SkillCup: [2589], [2286], [695]/[2593], [1085]. Других карточек по заведению номенклатуры в выгрузке нет.</p>
+        <p>Источники SkillCup: [2589], [2286], [695]/[2593].</p>
       </div>
     </details>
   </main>
@@ -354,8 +283,10 @@ def write_html(mapping: dict[str, list[str]]) -> None:
 
 def main() -> None:
     ASSETS.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(LOGO_SRC, ASSETS / "logo.png")
-    shutil.copy2(FAV_SRC, ASSETS / "favicon.svg")
+    if LOGO_SRC.exists():
+        shutil.copy2(LOGO_SRC, ASSETS / "logo.png")
+    if FAV_SRC.exists():
+        shutil.copy2(FAV_SRC, ASSETS / "favicon.svg")
     mapping = compress()
     for k, v in mapping.items():
         print(k, len(v))
