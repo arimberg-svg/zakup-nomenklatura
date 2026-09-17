@@ -198,7 +198,7 @@ def write_html(mapping: dict[str, list[str]]) -> None:
     <details class="topic" id="naming">
       <summary>
         <span class="num">02</span>
-        <span class="sum-text">Правильное наименование<small>SkillCup [2589]</small></span>
+        <span class="sum-text">Правильное наименование<small>Формула имени товара в 1С</small></span>
         <span class="chev">▾</span>
       </summary>
       <div class="topic-body">
@@ -211,7 +211,7 @@ def write_html(mapping: dict[str, list[str]]) -> None:
     <details class="topic" id="single">
       <summary>
         <span class="num">03</span>
-        <span class="sum-text">Заливка поштучно в 1С<small>SkillCup [2286]</small></span>
+        <span class="sum-text">Заливка поштучно в 1С<small>Одна карточка руками</small></span>
         <span class="chev">▾</span>
       </summary>
       <div class="topic-body">
@@ -231,11 +231,11 @@ def write_html(mapping: dict[str, list[str]]) -> None:
     <details class="topic" id="mass">
       <summary>
         <span class="num">04</span>
-        <span class="sum-text">Массовое заведение в 1С<small>SkillCup [695] / [2593]</small></span>
+        <span class="sum-text">Массовое заведение в 1С<small>Линейка через модуль в базе</small></span>
         <span class="chev">▾</span>
       </summary>
       <div class="topic-body">
-        <p>Когда есть готовый список и нужно завести линейку целиком. Раскрывайте шаги по порядку — 15 экранов из SkillCup.</p>
+        <p>Когда есть готовый список и нужно завести линейку целиком. Раскрывайте шаги по порядку.</p>
         <div class="note">
           <b>Модуль уже в 1С:Торговля</b>
           У сотрудников отдела закупа модуль массовой заливки установлен в базе — открывайте его из 1С, отдельно скачивать не нужно.
@@ -266,7 +266,6 @@ def write_html(mapping: dict[str, list[str]]) -> None:
             </tbody>
           </table>
         </div>
-        <p>Источники SkillCup: [2589], [2286], [695]/[2593].</p>
       </div>
     </details>
   </main>
